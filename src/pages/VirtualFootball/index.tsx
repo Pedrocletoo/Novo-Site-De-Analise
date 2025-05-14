@@ -1,5 +1,5 @@
 import React from 'react';
-import TableVirtualFootball from '../../components/TableVirtualFootball';
+import LeagueTable from '../../components/leagues';
 import Filters, { FilterProvider } from '../../components/Filters';
 import { VirtualFootballContainer, PageTitle } from './styles';
 
@@ -9,7 +9,7 @@ const VirtualFootball: React.FC = () => {
       <VirtualFootballContainer>
         <PageTitle>Futebol Virtual</PageTitle>
         <Filters />
-        <TableVirtualFootball />
+        <LeagueTable />
       </VirtualFootballContainer>
     </FilterProvider>
   );

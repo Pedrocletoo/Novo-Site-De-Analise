@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMatchData, useMatchTime, useMatchScore } from '../../hooks';
 import { 
   MatchesContainer, 
@@ -56,10 +56,40 @@ const MatchListItem: React.FC<{ matchId: string }> = ({ matchId }) => {
  * Componente principal para listar todas as partidas
  */
 const MatchesList: React.FC = () => {
+  const [showLoading, setShowLoading] = useState(true);
   const { matches, loading, error, refetch } = useMatchData();
+  
+  // Efeito para controlar a exibição da mensagem de carregamento
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (loading) {
+      // Ao iniciar carregamento, agendamos a exibição da mensagem
+      // após 300ms para evitar flashes de loading em requisições rápidas
+      timer = setTimeout(() => setShowLoading(true), 300);
+    } else {
+      // Dados carregados, escondemos o loading mas com um breve delay
+      timer = setTimeout(() => setShowLoading(false), 100);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   if (loading) {
-    return <LoadingIndicator>Carregando partidas...</LoadingIndicator>;
+    return (
+      <LoadingIndicator>
+        <div style={{ textAlign: 'center' }}>
+          <div>Carregando partidas...</div>
+          <div style={{ 
+            fontSize: '12px', 
+            marginTop: '8px',
+            opacity: 0.7 
+          }}>
+            Atualização automática a cada 9 segundos
+          </div>
+        </div>
+      </LoadingIndicator>
+    );
   }
 
   if (error) {

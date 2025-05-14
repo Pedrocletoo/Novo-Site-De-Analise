@@ -17,7 +17,7 @@ import TableVirtualFootball from '../../components/TableVirtualFootball';
 /**
  * Componente para exibição detalhada dos dados de uma partida
  */
-const MatchDetails: React.FC<{ match: IMatch }> = ({ match }) => {
+const MatchDetails: React.FC<{ match: IMatch; isUpdating?: boolean }> = ({ match, isUpdating = false }) => {
   // Extrai as informações de hora e minuto da partida
   const [timeInfo, setTimeInfo] = useState({ hour: 0, minute: 0 });
   
@@ -82,7 +82,7 @@ const MatchDetails: React.FC<{ match: IMatch }> = ({ match }) => {
  * Componente para exibição da tabela de partidas por hora
  */
 const TableTester: React.FC = () => {
-  const { matches, loading, error, refetch } = useMatchData();
+  const { matches, loading, error, refetch, isBackgroundRefreshing } = useMatchData();
   const [testHour, setTestHour] = useState<number | null>(null);
   
   // Gerar as opções de horas para o seletor
@@ -123,11 +123,12 @@ const TableTester: React.FC = () => {
         flexWrap: 'wrap',
         padding: '15px',
         backgroundColor: '#f0f9ff',
-        borderRadius: '4px'
+        borderRadius: '4px',
+        position: 'relative'
       }}>
         <div>
-          <RefreshButton onClick={() => refetch()}>
-            Atualizar Dados da API
+          <RefreshButton onClick={() => refetch()} disabled={loading || isBackgroundRefreshing}>
+            {loading && matches.length === 0 ? 'Carregando...' : isBackgroundRefreshing ? 'Atualizando...' : 'Atualizar Dados da API'}
           </RefreshButton>
         </div>
         
@@ -175,8 +176,8 @@ const TableTester: React.FC = () => {
         </div>
       </div>
       
-      {loading && <div>Carregando dados da API...</div>}
-      {error && <div>Erro ao carregar dados: {error.message}</div>}
+      {loading && matches.length === 0 && <div>Carregando dados da API...</div>}
+      {error && matches.length === 0 && <div>Erro ao carregar dados: {error.message}</div>}
       
       <div style={{ marginTop: '20px' }}>
         <TableVirtualFootball />
@@ -189,7 +190,7 @@ const TableTester: React.FC = () => {
  * Página de exibição dos dados da API
  */
 const MatchesData: React.FC = () => {
-  const { matches, loading, error, refetch } = useMatchData();
+  const { matches, loading, error, refetch, isBackgroundRefreshing } = useMatchData();
   const [selectedMatch, setSelectedMatch] = useState<IMatch | null>(null);
   
   // Selecionar o primeiro jogo para detalhes quando os dados chegarem
@@ -208,21 +209,43 @@ const MatchesData: React.FC = () => {
     setSelectedMatch(match);
   };
   
+  // Adicionar estilo CSS para animação da barra de progresso
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes progress-bar-animation {
+        0% { width: 0%; left: 0; right: auto; }
+        50% { width: 100%; left: 0; right: auto; }
+        51% { width: 100%; right: 0; left: auto; }
+        100% { width: 0%; right: 0; left: auto; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+  
   return (
     <PageContainer>
       <PageTitle>Dados da API de Jogos</PageTitle>
       
-      <RefreshButton onClick={handleRefresh}>
-        Atualizar Dados
-      </RefreshButton>
+      <div style={{ position: 'relative' }}>
+        <RefreshButton onClick={handleRefresh} disabled={loading || isBackgroundRefreshing}>
+          {loading && matches.length === 0 ? 'Carregando...' : isBackgroundRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
+        </RefreshButton>
+      </div>
       
-      {loading && <p>Carregando dados...</p>}
-      {error && <p>Erro ao carregar dados: {error.message}</p>}
+      {/* Mostrar mensagem de carregamento apenas na carga inicial, quando não temos dados */}
+      {loading && matches.length === 0 && <p>Carregando dados...</p>}
+      {error && matches.length === 0 && <p>Erro ao carregar dados: {error.message}</p>}
       
-      {!loading && !error && (
+      {/* Se temos dados, exibir sempre, mesmo durante o loading ou com erro */}
+      {matches.length > 0 && (
         <>
           <h2>Detalhes do Primeiro Jogo:</h2>
-          {selectedMatch && <MatchDetails match={selectedMatch} />}
+          {selectedMatch && <MatchDetails match={selectedMatch} isUpdating={isBackgroundRefreshing} />}
           
           <h2>Tabela de Jogos por Hora:</h2>
           <TableTester />

@@ -16,7 +16,38 @@ export const Table = styled.table`
   table-layout: fixed;
 `;
 
-export const TableHeader = styled.thead`
+export const TableHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  
+  h2 {
+    font-size: 1.4rem;
+    margin: 0;
+    color: var(--text-color);
+  }
+  
+  .table-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .table-controls {
+      margin-top: 10px;
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+`;
+
+export const TableHeaderSection = styled.thead`
   border-bottom: 2px solid ${({ theme }) => theme.border};
 `;
 
@@ -100,13 +131,12 @@ export const ErrorMessage = styled.div`
 
 export const RefreshButton = styled.button`
   background-color: ${({ theme }) => theme.accent};
-  color: #111;
+  color: white;
   border: none;
   border-radius: 4px;
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: 600;
-  margin-bottom: 1rem;
   transition: filter 0.2s, transform 0.1s;
   
   &:hover {
@@ -116,6 +146,11 @@ export const RefreshButton = styled.button`
   &:active {
     transform: translateY(2px);
   }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 export const NoDataMessage = styled.div`
@@ -124,4 +159,49 @@ export const NoDataMessage = styled.div`
   padding: 2rem;
   color: ${({ theme }) => theme.textLight};
   font-style: italic;
+`;
+
+export const StatusIndicator = styled.div<{ connected?: boolean }>`
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background-color: ${props => props.connected ? '#4caf50' : '#f44336'};
+  }
+`;
+
+export const LastUpdatedInfo = styled.div`
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  position: relative;
+`;
+
+export const UpdateNotification = styled.span`
+  position: absolute;
+  top: -20px;
+  left: 0;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  animation: fadeInOut 5s ease-in-out;
+  
+  @keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
 `; 

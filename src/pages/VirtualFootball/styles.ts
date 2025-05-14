@@ -5,21 +5,22 @@ export const VirtualFootballContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90%;
+  width: 92%;
   max-width: 1400px;
   margin: 0 auto;
+  overflow-x: auto;
   
   @media (max-width: 1600px) {
-    width: 85%;
+    width: 95%;
   }
   
   @media (max-width: 1200px) {
-    width: 90%;
+    width: 98%;
   }
   
   @media (max-width: 768px) {
     padding: 20px 10px;
-    width: 95%;
+    width: 100%;
   }
 `;
 
@@ -43,4 +44,13 @@ export const PageTitle = styled.h1`
     margin: 12px auto 0;
     opacity: 0.8;
   }
+`;
+
+export const LeagueSeparator = styled.hr`
+  width: 100%;
+  margin: 32px 0;
+  border: none;
+  height: 1px;
+  background-color: var(--border-color);
+  opacity: 0.5;
 `; 

@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import { useFilterContext } from '../Filters';
 import { 
   TableContainer, 
   Table, 
@@ -13,11 +12,12 @@ import {
   HourCell,
   GreenPercentage,
   LoadingMessage
-} from './styles';
-import { CellColorProps } from './types';
-import { useMatchData } from '../../hooks';
-import { useTimeTable } from '../../hooks/useTimeTable';
-import { IMatch } from '../../services/api';
+} from '../../TableVirtualFootball/styles';
+import { CellColorProps } from '../../TableVirtualFootball/types';
+import { useMatchData } from '../../../hooks';
+import { useTimeTable } from '../../../hooks/useTimeTable';
+import { IMatch } from '../../../services/api';
+import { useFilterContext } from '../../Filters';
 
 /**
  * REGRAS IMPORTANTES:
@@ -34,8 +34,6 @@ import { IMatch } from '../../services/api';
  *    - Não existem jogos em minutos intermediários ou aproximados 
  *    - Cada jogo corresponde precisamente a uma célula específica na tabela
  *    - Exemplo: Um jogo às 15:43 aparece na linha 15, coluna 43
- * 
- * 3. QUALQUER ALTERAÇÃO DEVE MANTER ESTAS CONVENÇÕES
  */
 
 // Interface para os minutos no cabeçalho horizontal
@@ -48,6 +46,11 @@ interface IHeaderPercentage {
   value: string;
   fraction: string;
   color?: 'green' | 'red';
+}
+
+interface LeagueTableProps {
+  leagueId: string;
+  leagueName: string;
 }
 
 /**
@@ -78,22 +81,19 @@ const isHomeWin = (homeScore: number, awayScore: number): boolean | undefined =>
 };
 
 /**
- * Componente de Tabela de Futebol Virtual
- * Exibe dados de jogos em uma tabela formatada
- * 
- * A tabela é organizada por horas (linhas) e minutos (colunas)
- * Os jogos SEMPRE correspondem exatamente às combinações hora:minuto disponíveis
+ * Componente de Tabela de Liga
+ * Componente base que pode ser reutilizado para diferentes ligas
  */
-const TableVirtualFootball: React.FC = () => {
+const LeagueTable: React.FC<LeagueTableProps> = ({ leagueId, leagueName }) => {
   // Obter configurações de filtro
-  const { hoursFilter, liga } = useFilterContext();
+  const { hoursFilter } = useFilterContext();
   
   // Estado para controlar contador de atualizações
   const [updateCount, setUpdateCount] = React.useState(0);
   const lastUpdatedTimeRef = useRef<Date | null>(null);
   
   // Buscar dados da API
-  const { matches, loading, error, lastUpdated, isBackgroundRefreshing } = useMatchData(liga || 'euro', '480');
+  const { matches, loading, error, lastUpdated, isBackgroundRefreshing } = useMatchData(leagueId, '480');
   
   // Estado para exibir indicador de atualização recente
   const [showUpdateIndicator, setShowUpdateIndicator] = React.useState(false);
@@ -176,7 +176,6 @@ const TableVirtualFootball: React.FC = () => {
   }, [currentHour, hoursFilter]);
   
   // Processar os dados da tabela usando o hook useTimeTable
-  // Configurado para modo normal (não teste) e usando as horas filtradas
   const { cells } = useTimeTable(matches, true, undefined, filteredHours);
   
   // Contadores para estatísticas por hora
@@ -281,7 +280,7 @@ const TableVirtualFootball: React.FC = () => {
       <TableContainer>
         <LoadingMessage>
           <div style={{ textAlign: 'center' }}>
-            <div>Carregando dados dos jogos...</div>
+            <div>Carregando dados da {leagueName}...</div>
           </div>
         </LoadingMessage>
       </TableContainer>
@@ -292,7 +291,7 @@ const TableVirtualFootball: React.FC = () => {
   if (error && matches.length === 0) {
     return (
       <TableContainer>
-        <LoadingMessage>Erro ao carregar dados: {error.message}</LoadingMessage>
+        <LoadingMessage>Erro ao carregar dados da {leagueName}: {error.message}</LoadingMessage>
       </TableContainer>
     );
   }
@@ -310,4 +309,4 @@ const TableVirtualFootball: React.FC = () => {
   );
 };
 
-export default TableVirtualFootball;
+export default LeagueTable; 

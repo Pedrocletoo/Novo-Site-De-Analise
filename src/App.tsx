@@ -4,11 +4,9 @@ import Sidebar from './components/Sidebar';
 import VirtualFootball from './pages/VirtualFootball';
 import MatchesDataPage from './pages/MatchesData';
 import MatchesFiltersPage from './pages/MatchesFilters';
-import TimeTablePage from './pages/timeTable';
-import TestTimeTablePage from './pages/testTimeTable';
-import TesteTabela from './components/TesteTabela';
 import styled from 'styled-components';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { FilterProvider } from './components/Filters';
 
 const MainContainer = styled.div`
   display: flex;
@@ -70,53 +68,52 @@ const CommonContentStyles = styled.div`
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <Router>
-        <MainContainer>
-          <Sidebar />
-          <ContentArea>
-            <Routes>
-              <Route path="/" element={
-                <PageWrapper>
-                  <CommonContentStyles>
-                    <h1>Dashboard</h1>
-                    <p>Bem-vindo à plataforma de análise.</p>
-                  </CommonContentStyles>
-                </PageWrapper>
-              } />
-              <Route path="/futebol-virtual" element={<VirtualFootball />} />
-              <Route path="/partidas" element={<MatchesDataPage />} />
-              <Route path="/filtrar-partidas" element={<MatchesFiltersPage />} />
-              <Route path="/estatisticas" element={
-                <PageWrapper>
-                  <CommonContentStyles>
-                    <h1>Estatísticas</h1>
-                    <p>Visualize estatísticas detalhadas e análises de dados.</p>
-                  </CommonContentStyles>
-                </PageWrapper>
-              } />
-              <Route path="/resultados" element={
-                <PageWrapper>
-                  <CommonContentStyles>
-                    <h1>Resultados</h1>
-                    <p>Confira os resultados mais recentes.</p>
-                  </CommonContentStyles>
-                </PageWrapper>
-              } />
-              <Route path="/tabela-horarios" element={<TimeTablePage />} />
-              <Route path="/teste-tabela" element={<TestTimeTablePage />} />
-              <Route path="/teste-tabela-detalhes" element={<TesteTabela />} />
-              <Route path="/configuracoes" element={
-                <PageWrapper>
-                  <CommonContentStyles>
-                    <h1>Configurações</h1>
-                    <p>Personalize sua experiência na plataforma.</p>
-                  </CommonContentStyles>
-                </PageWrapper>
-              } />
-            </Routes>
-          </ContentArea>
-        </MainContainer>
-      </Router>
+      <FilterProvider>
+        <Router>
+          <MainContainer>
+            <Sidebar />
+            <ContentArea>
+              <Routes>
+                <Route path="/" element={
+                  <PageWrapper>
+                    <CommonContentStyles>
+                      <h1>Dashboard</h1>
+                      <p>Bem-vindo à plataforma de análise.</p>
+                    </CommonContentStyles>
+                  </PageWrapper>
+                } />
+                <Route path="/futebol-virtual" element={<VirtualFootball />} />
+                <Route path="/partidas" element={<MatchesDataPage />} />
+                <Route path="/filtrar-partidas" element={<MatchesFiltersPage />} />
+                <Route path="/estatisticas" element={
+                  <PageWrapper>
+                    <CommonContentStyles>
+                      <h1>Estatísticas</h1>
+                      <p>Visualize estatísticas detalhadas e análises de dados.</p>
+                    </CommonContentStyles>
+                  </PageWrapper>
+                } />
+                <Route path="/resultados" element={
+                  <PageWrapper>
+                    <CommonContentStyles>
+                      <h1>Resultados</h1>
+                      <p>Confira os resultados mais recentes.</p>
+                    </CommonContentStyles>
+                  </PageWrapper>
+                } />
+                <Route path="/configuracoes" element={
+                  <PageWrapper>
+                    <CommonContentStyles>
+                      <h1>Configurações</h1>
+                      <p>Personalize sua experiência na plataforma.</p>
+                    </CommonContentStyles>
+                  </PageWrapper>
+                } />
+              </Routes>
+            </ContentArea>
+          </MainContainer>
+        </Router>
+      </FilterProvider>
     </ThemeProvider>
   );
 };

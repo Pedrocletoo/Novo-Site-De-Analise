@@ -98,4 +98,54 @@ export const DownArrow = styled.div`
   border-right: 6px solid transparent;
   border-top: 6px solid var(--accent-color);
   pointer-events: none;
+`;
+
+export const CheckboxContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--select-background);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 8px 12px;
+  max-height: 120px;
+  overflow-y: auto;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+  }
+`;
+
+export const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--text-color);
+  cursor: pointer;
+  
+  &:hover {
+    color: var(--accent-color);
+  }
+`;
+
+export const CheckboxInput = styled.input`
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: var(--accent-color);
+  width: 16px;
+  height: 16px;
 `; 

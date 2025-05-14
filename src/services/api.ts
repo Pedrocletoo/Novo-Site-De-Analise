@@ -29,7 +29,7 @@ export interface IMatch {
 const API_CONFIG = {
   BASE_URL: 'https://easy-api-betano-fv.u6y5np.easypanel.host',
   TIMEOUT: 10000, // 10 segundos
-  CACHE_TIME: 60000, // 1 minuto
+  CACHE_TIME: 10000, // 10 segundos (era 60000 - 1 minuto)
 }
 
 // Sistema de cache para evitar requisições duplicadas
@@ -87,6 +87,9 @@ class ApiService {
    */
   async getMatches(liga: string = 'euro', result: string = '480'): Promise<IMatch[]> {
     const cacheKey = `matches_${liga}_${result}`;
+    
+    // Sempre limpa o cache para garantir dados atualizados
+    CacheManager.clear(cacheKey);
     
     // Verifica se já temos esses dados em cache
     const cachedData = CacheManager.get<IMatch[]>(cacheKey);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMatchData } from '../hooks/useMatchData';
 import { useHourlyStats } from '../hooks/useTimeTable';
 
@@ -7,11 +7,30 @@ interface HourlyStatsProps {
 }
 
 const HourlyStats: React.FC<HourlyStatsProps> = ({ liga = 'euro' }) => {
+  // Estado para controlar exibição do loading
+  const [showLoading, setShowLoading] = useState(true);
+  
   // Buscar dados da API usando o hook existente
   const { matches, loading, error } = useMatchData(liga);
   
   // Processar estatísticas por hora
   const hourlyStats = useHourlyStats(matches);
+  
+  // Efeito para controlar a exibição da mensagem de carregamento
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (loading) {
+      // Ao iniciar carregamento, agendamos a exibição da mensagem
+      // após 300ms para evitar flashes de loading em requisições rápidas
+      timer = setTimeout(() => setShowLoading(true), 300);
+    } else {
+      // Dados carregados, escondemos o loading mas com um breve delay
+      timer = setTimeout(() => setShowLoading(false), 100);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [loading]);
   
   // Filtrando apenas horas com jogos
   const activeHours = Object.keys(hourlyStats)
@@ -21,7 +40,18 @@ const HourlyStats: React.FC<HourlyStatsProps> = ({ liga = 'euro' }) => {
   
   // Renderização condicional baseada no estado de carregamento
   if (loading) {
-    return <div className="loading">Carregando estatísticas...</div>;
+    return (
+      <div className="loading" style={{ textAlign: 'center' }}>
+        <div>Carregando estatísticas...</div>
+        <div style={{ 
+          fontSize: '12px', 
+          marginTop: '8px',
+          opacity: 0.7 
+        }}>
+          Atualização automática a cada 9 segundos
+        </div>
+      </div>
+    );
   }
   
   if (error) {

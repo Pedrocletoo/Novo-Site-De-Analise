@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useMatchData } from '../../hooks';
 import { IMatch } from '../../services/api';
 import {
   TableContainer,
   Table,
-  TableHeader,
+  TableHeaderSection,
   TableBody,
   TableRow,
   TableCell,
@@ -15,7 +15,11 @@ import {
   LoadingIndicator,
   ErrorMessage,
   RefreshButton,
-  NoDataMessage
+  NoDataMessage,
+  StatusIndicator,
+  LastUpdatedInfo,
+  UpdateNotification,
+  TableHeader
 } from './styles';
 
 /**
@@ -70,19 +74,70 @@ const TeamNames: React.FC<{ match: IMatch }> = ({ match }) => {
  */
 interface MatchesTableProps {
   matches?: IMatch[]; // Lista opcional de partidas filtradas
+  liga?: string;
+  result?: string;
 }
 
 /**
  * Componente principal da tabela de partidas
- * Consome o hook useMatchData para obter os dados da API
- * ou aceita uma lista de partidas já filtradas via props
+ * Usa polling para atualizações periódicas com atualização silenciosa
  */
-const MatchesTable: React.FC<MatchesTableProps> = ({ matches: filteredMatches }) => {
-  // Usando o mesmo hook que a página /partidas utiliza
-  const { matches: apiMatches, loading, error, refetch } = useMatchData();
+const MatchesTable: React.FC<MatchesTableProps> = ({ 
+  matches: filteredMatches,
+  liga = 'euro',
+  result = '480'
+}) => {
+  // Usando o hook de API para dados periódicos
+  const { 
+    matches: apiMatches, 
+    loading, 
+    error, 
+    refetch,
+    connected,
+    lastUpdated,
+    isBackgroundRefreshing
+  } = useMatchData(liga, result);
 
   // Usa as partidas filtradas recebidas como props ou todas as partidas da API
   const matchesToDisplay = filteredMatches || apiMatches;
+  
+  // Referência para rastrear se houve mudança nos dados para medição de performance
+  const prevMatchesRef = useRef<IMatch[] | null>(null);
+  
+  // Estado para controlar a exibição da mensagem de atualização
+  const [showUpdateMessage, setShowUpdateMessage] = useState(false);
+  
+  // Efeito para medir o tempo de atualização da tabela quando os dados mudam
+  useEffect(() => {
+    if (prevMatchesRef.current && matchesToDisplay.length > 0) {
+      // Comparamos apenas o primeiro jogo como amostra para verificar se os dados mudaram
+      const currentFirstMatch = matchesToDisplay[0];
+      const prevFirstMatch = prevMatchesRef.current[0];
+      
+      if (currentFirstMatch && prevFirstMatch && 
+          (currentFirstMatch.id !== prevFirstMatch.id ||
+           currentFirstMatch.FullTimeHomeTeam !== prevFirstMatch.FullTimeHomeTeam ||
+           currentFirstMatch.FullTimeAwayTeam !== prevFirstMatch.FullTimeAwayTeam)) {
+        console.log('=== Tabela atualizada com novos dados ===');
+        console.log(`Total de partidas na tabela: ${matchesToDisplay.length}`);
+        console.log(`Tempo de renderização completa medido no componente MatchesTable`);
+        
+        // Mostra mensagem de atualização
+        setShowUpdateMessage(true);
+        setTimeout(() => setShowUpdateMessage(false), 5000);
+        
+        // Medir o tempo de pintura no navegador
+        const paintStart = performance.now();
+        requestAnimationFrame(() => {
+          const paintEnd = performance.now();
+          console.log(`Tempo estimado até a pintura no navegador: ${(paintEnd - paintStart).toFixed(2)}ms`);
+        });
+      }
+    }
+    
+    // Armazenar referência aos dados atuais
+    prevMatchesRef.current = matchesToDisplay;
+  }, [matchesToDisplay]);
 
   // Renderiza a linha da tabela para cada partida
   const renderMatchRow = (match: IMatch) => (
@@ -100,13 +155,33 @@ const MatchesTable: React.FC<MatchesTableProps> = ({ matches: filteredMatches })
     </TableRow>
   );
 
-  // Estado de carregamento (apenas quando não recebeu partidas filtradas)
-  if (!filteredMatches && loading) {
-    return <LoadingIndicator>Carregando dados das partidas...</LoadingIndicator>;
+  // Formata a data para exibição
+  const formatLastUpdated = () => {
+    if (!lastUpdated) return 'Aguardando dados...';
+    
+    const now = new Date();
+    const diff = now.getTime() - lastUpdated.getTime();
+    
+    if (diff < 10000) return 'Agora mesmo';
+    if (diff < 60000) return `${Math.floor(diff / 1000)} segundos atrás`;
+    if (diff < 3600000) return `${Math.floor(diff / 60000)} minutos atrás`;
+    
+    return `${lastUpdated.getHours()}:${String(lastUpdated.getMinutes()).padStart(2, '0')}`;
+  };
+
+  // Estado de carregamento - sempre mostrar para visualizar as atualizações
+  if (loading && matchesToDisplay.length === 0) {
+    return (
+      <LoadingIndicator>
+        <div style={{ textAlign: 'center' }}>
+          <div>Carregando dados das partidas...</div>
+        </div>
+      </LoadingIndicator>
+    );
   }
 
   // Tratamento de erro (apenas quando não recebeu partidas filtradas)
-  if (!filteredMatches && error) {
+  if (!filteredMatches && error && matchesToDisplay.length === 0) {
     return (
       <ErrorMessage>
         <p>Erro ao carregar dados: {error.message}</p>
@@ -123,21 +198,28 @@ const MatchesTable: React.FC<MatchesTableProps> = ({ matches: filteredMatches })
   // Renderiza a tabela com os dados
   return (
     <TableContainer>
-      {!filteredMatches && (
-        <RefreshButton onClick={() => refetch()}>
-          Atualizar dados
-        </RefreshButton>
-      )}
+      <TableHeader>
+        <h2>Resultados {liga.toUpperCase()}</h2>
+        <div className="table-controls">
+          <StatusIndicator connected={connected} />
+          <LastUpdatedInfo>
+            Atualizado: {formatLastUpdated()}
+          </LastUpdatedInfo>
+          <RefreshButton onClick={() => refetch()} disabled={loading || isBackgroundRefreshing}>
+            {loading || isBackgroundRefreshing ? 'Atualizando...' : 'Atualizar agora'}
+          </RefreshButton>
+        </div>
+      </TableHeader>
 
+      {/* Tabela sem envoltório extra que estava causando espaço */}
       <Table>
-        <TableHeader>
+        <TableHeaderSection>
           <TableRow>
+            <TableHeaderCell>Jogo</TableHeaderCell>
             <TableHeaderCell>Horário</TableHeaderCell>
-            <TableHeaderCell>Times</TableHeaderCell>
-            <TableHeaderCell>Placar</TableHeaderCell>
-            <TableHeaderCell>Liga</TableHeaderCell>
+            <TableHeaderCell>Resultado</TableHeaderCell>
           </TableRow>
-        </TableHeader>
+        </TableHeaderSection>
         <TableBody>
           {matchesToDisplay.map(renderMatchRow)}
         </TableBody>
