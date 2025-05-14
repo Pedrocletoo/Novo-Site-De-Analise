@@ -3,4 +3,8 @@
  * Facilita a importação em outros arquivos
  */
 
-export * from './useMatchData'; 
+export * from './useMatchData';
+export * from './useItalianMatchData';
+export * from './useItalianTimeTable';
+export * from './useCopaEstrelasMatchData';
+export * from './useCopaEstrelasTimeTable'; 

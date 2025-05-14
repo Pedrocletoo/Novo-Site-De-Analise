@@ -4,6 +4,8 @@ import styled from 'styled-components';
 
 // Componentes específicos de cada liga
 import EuroLeague from './euro-league';
+import CampeonatoItaliano from './campeonato-italiano';
+import CopaEstrelas from './copa-estrelas';
 
 const LeaguesContainer = styled.div`
   display: flex;
@@ -29,13 +31,24 @@ const LeagueTable: React.FC = () => {
   const renderLeagueComponents = () => {
     if (liga === 'todos') {
       // Se a opção "Todos" estiver selecionada, mostra todas as ligas
-      // Como atualmente só temos a Euro League, vamos mostrá-la
-      return <EuroLeague />;
+      return (
+        <>
+          <EuroLeague />
+          <LeagueDivider />
+          <CampeonatoItaliano />
+          <LeagueDivider />
+          <CopaEstrelas />
+        </>
+      );
     } else {
       // Caso contrário, mostra apenas a liga selecionada
       switch (liga) {
         case 'euro':
           return <EuroLeague />;
+        case 'italiano':
+          return <CampeonatoItaliano />;
+        case 'copa-estrelas':
+          return <CopaEstrelas />;
         default:
           return <EuroLeague />;
       }

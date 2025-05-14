@@ -38,14 +38,16 @@ export const useFilterContext = () => useContext(FilterContext);
 // Lista de ligas disponíveis
 export const availableLeagues = [
   { id: 'todos', name: 'Todos' },
-  { id: 'euro', name: 'Euro League' }
+  { id: 'euro', name: 'Euro League' },
+  { id: 'italiano', name: 'Campeonato Italiano' },
+  { id: 'copa-estrelas', name: 'Copa das Estrelas' }
 ];
 
 // Provider que envolve os componentes que precisam acessar os filtros
 export const FilterProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [hoursFilter, setHoursFilter] = useState<number>(12);
   const [liga, setLiga] = useState<string>('todos');
-  const [selectedLeagues, setSelectedLeagues] = useState<string[]>(['euro']);
+  const [selectedLeagues, setSelectedLeagues] = useState<string[]>(['euro', 'italiano', 'copa-estrelas']);
   const [showAllLeagues, setShowAllLeagues] = useState<boolean>(false);
 
   return (
