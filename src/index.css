@@ -1,0 +1,53 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Centralizando o conteúdo da página */
+#root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Removendo a barra de controle deslizante da imagem */
+::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+input[type=range],
+[role="slider"],
+.scrubber,
+.progress-bar,
+.slider,
+.controls,
+.video-controls {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Oculta os controles específicos do player */
+.player-controls,
+.media-control,
+.media-controls,
+.video-js .vjs-control-bar,
+.plyr__controls,
+.slider-container,
+.audio-player::-webkit-media-controls,
+.video-player::-webkit-media-controls {
+  display: none !important;
+} 
